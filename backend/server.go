@@ -12,10 +12,9 @@ import (
 func main() {
 	r := gin.Default()
 
-	middleware.InitTables(true)
-	r.Use(middleware.InitException())
 	r.Use(middleware.InitConnection())
 	routers.InitRouter(r)
+	r.Use(middleware.InitException())
 	err := r.Run(":80")
 	if err != nil {
 		fmt.Println(err)

@@ -8,7 +8,7 @@ import (
 
 func InitException() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		fmt.Println("test")
 		c.Next()
+		fmt.Println("test")
 	}
 }
