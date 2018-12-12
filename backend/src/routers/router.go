@@ -15,4 +15,8 @@ func InitRouter(r *gin.Engine) {
 	{
 		dlogApi.GET("/me", controllers.DlogMe)
 	}
+
+	r.NoRoute(func(c *gin.Context) {
+		c.JSON(404, gin.H{"name": "NotFound"})
+	})
 }

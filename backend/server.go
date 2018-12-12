@@ -13,8 +13,8 @@ func main() {
 	r := gin.Default()
 
 	r.Use(middleware.InitConnection())
+	r.Use(middleware.HanddleException())
 	routers.InitRouter(r)
-	r.Use(middleware.InitException())
 	err := r.Run(":80")
 	if err != nil {
 		fmt.Println(err)
