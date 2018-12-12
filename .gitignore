@@ -2,3 +2,5 @@ node_modules
 .DS_Store
 backend/src/config/config.json
 *.log
+debug
+pkg
