@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	r "github.com/dosReady/dlog/backend/routers"
+	. "github.com/dosReady/dlog/backend/routers"
 
 	"github.com/gin-gonic/gin"
 )
@@ -11,6 +11,6 @@ import (
 func main() {
 	router := gin.Default()
 	router.LoadHTMLGlob("template/*")
-	r.SettingRouters(router)
+	SettingRouters(router)
 	log.Fatal(router.Run(":80"))
 }
