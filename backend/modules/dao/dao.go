@@ -29,20 +29,14 @@ func Select(sql string, values ...interface{}) *interface{} {
 func List(sql string, values ...interface{}) *[]interface{} {
 	var returnValue []interface{}
 	conn := GetConnection()
-	rows, err := conn.Raw(sql, values).Rows()
-	if err != nil {
-		fmt.Println("ERROR")
-		fmt.Println(err)
-	} else {
-		for rows.Next() {
-			var result interface{}
-			if err := rows.Scan(&result); err != nil {
-				fmt.Println("ERROR")
-				fmt.Println(err)
-			}
-			returnValue = append(returnValue, &result)
+	rows, _ := conn.Raw(sql, values).Rows()
+	defer rows.Close()
+	for rows.Next() {
+		var result interface{}
+		if err := conn.ScanRows(rows, &result); err != nil {
+			fmt.Println(err)
 		}
+		returnValue = append(returnValue, result)
 	}
-	conn.Close()
 	return &returnValue
 }
