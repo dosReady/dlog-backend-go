@@ -3,6 +3,7 @@ package router
 import (
 	"net/http"
 
+	dlogCtrl "github.com/dosReady/dlog/backend/controllers/dlog"
 	"github.com/gin-gonic/gin"
 )
 
@@ -33,8 +34,6 @@ func SettingRouters(r *gin.Engine) {
 
 	api := r.Group("/api")
 	{
-		api.POST("/dlog", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{"name": "dos"})
-		})
+		api.POST("/dlog", dlogCtrl.UserSelect)
 	}
 }

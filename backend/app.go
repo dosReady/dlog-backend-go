@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"fmt"
 
 	. "github.com/dosReady/dlog/backend/routers"
 
@@ -12,5 +12,7 @@ func main() {
 	router := gin.Default()
 	router.LoadHTMLGlob("template/*")
 	SettingRouters(router)
-	log.Fatal(router.Run(":80"))
+	if err := router.Run(":80"); err != nil {
+		fmt.Println(err)
+	}
 }
