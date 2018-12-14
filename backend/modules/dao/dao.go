@@ -2,6 +2,7 @@ package dao
 
 import (
 	"fmt"
+	"reflect"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
@@ -17,26 +18,44 @@ func GetConnection() *gorm.DB {
 	}
 	return db
 }
-
-func Select(sql string, values ...interface{}) *interface{} {
-	var result interface{}
-	conn := GetConnection()
-	conn.Raw(sql, values).Scan(&result)
-	conn.Close()
-	return &result
-}
-
-func List(sql string, values ...interface{}) *[]interface{} {
-	var returnValue []interface{}
-	conn := GetConnection()
-	rows, _ := conn.Raw(sql, values).Rows()
-	defer rows.Close()
-	for rows.Next() {
-		var result interface{}
-		if err := conn.ScanRows(rows, &result); err != nil {
-			fmt.Println(err)
+func List(ref interface{}, sql string, values ...interface{}) {
+	ch := make(chan []interface{})
+	fch := make(chan int)
+	// 참조 필드 가져오기
+	go func() {
+		var fields []interface{}
+		t := reflect.TypeOf(ref)
+		fmt.Println(t)
+		for i := 0; i < t.NumField(); i++ {
+			f := t.Field(i)
+			fields = append(fields, reflect.New(f.Type))
 		}
-		returnValue = append(returnValue, result)
-	}
-	return &returnValue
+		ch <- fields
+		fch <- 123
+	}()
+	// 참조 필드 값 셋팅하기
+	// https://forum.golangbridge.org/t/database-rows-scan-unknown-number-of-columns-json/7378
+	go func(ch chan []interface{}) {
+		i := <-fch
+		fch <- i + 123
+		fields := <-ch
+		conn := GetConnection()
+		rows, _ := conn.Raw(sql, values).Rows()
+		for rows.Next() {
+			if err := rows.Scan(fields...); err != nil {
+				panic(err)
+			}
+		}
+		ch <- fields
+	}(ch)
+
+	// 결과 값 만들기
+	go func(ch chan []interface{}) {
+		fields := <-ch
+		i := <-fch
+		fmt.Println(fields)
+		fmt.Println(i)
+	}(ch)
+	<-ch
+	close(ch)
 }

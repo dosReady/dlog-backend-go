@@ -31,6 +31,7 @@ func SettingRouters(r *gin.Engine) {
 			c.Next()
 		}
 	})
+	r.Use(gin.Recovery())
 
 	api := r.Group("/api")
 	{

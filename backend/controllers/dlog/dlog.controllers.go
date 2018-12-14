@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/dosReady/dlog/backend/modules/dao"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,7 +17,6 @@ type DlogUser struct {
 }
 
 func UserSelect(c *gin.Context) {
-	var dloguser []DlogUser
 	/*
 		conn := dao.GetConnection()
 		rows, _ := conn.Raw("SELECT * FROM dlog_user").Rows()
@@ -31,8 +29,7 @@ func UserSelect(c *gin.Context) {
 			dlogusers = append(dlogusers, user)
 		}
 	*/
-
-	dloguser = dao.List("SELECT * FROM dlog_user")
-
-	c.JSON(http.StatusOK, gin.H{"name": dlogusers})
+	var user DlogUser
+	dao.List(user, "SELECT * FROM dlog_user")
+	c.JSON(http.StatusOK, gin.H{"name": "qwe"})
 }
