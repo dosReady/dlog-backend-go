@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	dlogCtrl "github.com/dosReady/dlog/backend/controllers/dlog"
+	userModel "github.com/dosReady/dlog/backend/models/user"
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,7 +24,6 @@ func _urlvalidator(c *gin.Context) bool {
 }
 
 func SettingRouters(r *gin.Engine) {
-
 	r.Use(func(c *gin.Context) {
 		if _urlvalidator(c) {
 			c.HTML(http.StatusOK, "app.html", "")
@@ -37,5 +37,19 @@ func SettingRouters(r *gin.Engine) {
 	{
 		api.POST("/dlog", dlogCtrl.UserSelect)
 		api.POST("/dlog/login", dlogCtrl.UserLogin)
+	}
+	apitest := r.Group("/test")
+	{
+		apitest.Use(func(c *gin.Context) {
+			var param struct {
+				Token string
+			}
+			_ = c.ShouldBindJSON(&param)
+			userModel.AuthenticationUser(param.Token)
+			c.Next()
+		})
+		apitest.POST("/echo", func(c *gin.Context) {
+			c.JSON(http.StatusOK, gin.H{"name": "123"})
+		})
 	}
 }

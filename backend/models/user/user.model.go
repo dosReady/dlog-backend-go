@@ -52,3 +52,8 @@ func SignedUser(c *gin.Context) string {
 	conn.Close()
 	return accessToken
 }
+
+func AuthenticationUser(tokenString string) string {
+	jwt.VaildAccessToken(tokenString)
+	return ""
+}
