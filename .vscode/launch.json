@@ -9,7 +9,7 @@
             "name": "Launch",
             "type": "go",
             "request": "launch",
-            "mode": "debug",
+            "mode": "auto",
             "program": "${workspaceFolder}/backend/app.go",
             "env": {},
             "args": []

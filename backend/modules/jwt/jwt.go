@@ -1,7 +1,8 @@
 package modules
 
 import (
-	"fmt"
+	"errors"
+	"log"
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
@@ -23,7 +24,7 @@ func CreateAccessToken(obj interface{}) string {
 	payload := PayLoad{
 		Data: obj,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Minute * 30).Unix(),
+			ExpiresAt: time.Now().Add(time.Minute * 1).Unix(),
 			Issuer:    "dlog",
 		},
 	}
@@ -44,40 +45,42 @@ func CreateRefreshToken(obj interface{}) string {
 	tokenstr, _ := token.SignedString([]byte(cfg.GetJwtRefreshSecret()))
 	return tokenstr
 }
-
-func DecodeAccessToken(tokenString string) *PayLoad {
+func VaildAccessToken(tokenString string) *PayLoad {
 	cfg := config.New()
-	token, err := jwt.ParseWithClaims(tokenString, &PayLoad{}, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("JWT ERROR")
-		}
-		return []byte(cfg.GetJwtAccessSecret()), nil
-	})
+	decodeAccess, err := DecodeToken(tokenString, cfg.GetJwtAccessSecret())
 	if err != nil {
-		panic(err)
-	}
-
-	if claims, ok := token.Claims.(*PayLoad); ok && token.Valid {
-		return claims
-	} else {
+		log.Println(err)
 		return nil
+	} else {
+		return decodeAccess
 	}
 }
-func DecodeRereshToken(tokenString string) *PayLoad {
+func VaildRefreshToken(tokenString string) *PayLoad {
 	cfg := config.New()
+	decdoeRefresh, err := DecodeToken(tokenString, cfg.GetJwtRefreshSecret())
+	if err != nil {
+		log.Println(err)
+		return nil
+	} else {
+		return decdoeRefresh
+	}
+}
+
+func DecodeToken(tokenString string, secret string) (*PayLoad, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &PayLoad{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("JWT ERROR")
+			return nil, errors.New("token error")
 		}
-		return []byte(cfg.GetJwtRefreshSecret()), nil
+		return []byte(secret), nil
 	})
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	if claims, ok := token.Claims.(*PayLoad); ok && token.Valid {
-		return claims
+		return claims, nil
 	} else {
-		return nil
+		err := errors.New("tokenIsInVaild")
+		return nil, err
 	}
 }

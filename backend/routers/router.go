@@ -1,7 +1,6 @@
 package router
 
 import (
-	"fmt"
 	"net/http"
 
 	dlogCtrl "github.com/dosReady/dlog/backend/controllers/dlog"
@@ -42,15 +41,10 @@ func SettingRouters(r *gin.Engine) {
 	apitest := r.Group("/test")
 	{
 		apitest.Use(func(c *gin.Context) {
-			var param struct {
-				Token string
-			}
-			_ = c.ShouldBindJSON(&param)
-			result := userModel.AuthenticationUser(param.Token)
+			result := userModel.AuthenticationUser(c)
 			m := make(map[string]interface{})
 			m["test"] = result
 			c.Keys = m
-			fmt.Println(c.Keys)
 			c.Next()
 		})
 		apitest.POST("/echo", func(c *gin.Context) {

@@ -53,11 +53,22 @@ func SignedUser(c *gin.Context) string {
 	return accessToken
 }
 
-func AuthenticationUser(tokenString string) string {
-	decode := jwt.DecodeAccessToken(tokenString)
-	if decode != nil {
-		return jwt.CreateAccessToken(&decode)
-	} else {
-		return ""
+func AuthenticationUser(c *gin.Context) string {
+	var param struct {
+		Token string
+		Email string
 	}
+	_ = c.ShouldBindJSON(&param)
+
+	var user DlogUser
+	decode := jwt.VaildAccessToken(param.Token)
+	if decode == nil {
+		conn := dao.GetConnection()
+		conn.Select("refresh_token").Where(DlogUser{
+			UserEmail: param.Email,
+		}).Find(&user)
+
+		jwt.CreateAccessToken()
+	}
+	return ""
 }
