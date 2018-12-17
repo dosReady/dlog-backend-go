@@ -53,6 +53,9 @@ func SignedUser(c *gin.Context) string {
 	return accessToken
 }
 
+// 1. accesstoken 검증
+// 2. refreshtoken 검증
+// 3. accessToken 재발급
 func AuthenticationUser(c *gin.Context) string {
 	var param struct {
 		Token string
@@ -64,11 +67,20 @@ func AuthenticationUser(c *gin.Context) string {
 	decode := jwt.VaildAccessToken(param.Token)
 	if decode == nil {
 		conn := dao.GetConnection()
-		conn.Select("refresh_token").Where(DlogUser{
+		conn.Where(DlogUser{
 			UserEmail: param.Email,
 		}).Find(&user)
-
-		jwt.CreateAccessToken()
+		if decodeRefresh := jwt.VaildRefreshToken(user.RefreshToken); decodeRefresh != nil {
+			var data = struct {
+				UserEmail string
+				UserCall  string
+			}{
+				UserEmail: user.UserEmail,
+				UserCall:  user.UserCall,
+			}
+			return jwt.CreateAccessToken(&data)
+		}
 	}
+
 	return ""
 }
