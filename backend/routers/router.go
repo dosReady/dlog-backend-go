@@ -4,49 +4,21 @@ import (
 	"net/http"
 
 	dlogCtrl "github.com/dosReady/dlog/backend/controllers/dlog"
-	userModel "github.com/dosReady/dlog/backend/models/user"
+	middleware "github.com/dosReady/dlog/backend/modules/middleware"
 	"github.com/gin-gonic/gin"
 )
 
-type BodyJSON struct {
-	Val string
-}
-
-// STATIC 파일, API 호출 URL 아닌 경우에만 html 파일 호출
-// html 파일 호출이유는 Vue Js, React Js 같은것을 사용할때 새로고침 할 경우
-// 로드 파일을 불러올수 있도록 하기위함
-func _urlvalidator(c *gin.Context) bool {
-	result := false
-	if c.Request.Method == http.MethodGet {
-		result = true
-	}
-	return result
-}
-
 func SettingRouters(r *gin.Engine) {
-	r.Use(func(c *gin.Context) {
-		if _urlvalidator(c) {
-			c.HTML(http.StatusOK, "app.html", "")
-		} else {
-			c.Next()
-		}
-	})
+	r.Use(middleware.VerificationURL())
 	r.Use(gin.Recovery())
 
-	api := r.Group("/api")
+	api := r.Group("/api/dlog")
 	{
-		api.POST("/dlog", dlogCtrl.UserSelect)
-		api.POST("/dlog/login", dlogCtrl.UserLogin)
+		api.POST("/login", dlogCtrl.UserLogin)
 	}
 	apitest := r.Group("/test")
 	{
-		apitest.Use(func(c *gin.Context) {
-			result := userModel.AuthenticationUser(c)
-			m := make(map[string]interface{})
-			m["test"] = result
-			c.Keys = m
-			c.Next()
-		})
+		apitest.Use(middleware.CertifiedMdlw())
 		apitest.POST("/echo", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{"name": "123"})
 		})
