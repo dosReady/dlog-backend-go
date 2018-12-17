@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mitchellh/mapstructure"
-
 	jwt "github.com/dgrijalva/jwt-go"
 	config "github.com/dosReady/dlog/backend/modules/config"
 )
@@ -17,6 +15,11 @@ type PayLoad struct {
 
 func CreateAccessToken(obj interface{}) string {
 	cfg := config.New()
+
+	if payload, ok := obj.(PayLoad); ok {
+		obj = payload.Data
+	}
+
 	payload := PayLoad{
 		Data: obj,
 		StandardClaims: jwt.StandardClaims{
@@ -42,9 +45,9 @@ func CreateRefreshToken(obj interface{}) string {
 	return tokenstr
 }
 
-func VaildAccessToken(tokenString string) {
+func DecodeAccessToken(tokenString string) *PayLoad {
 	cfg := config.New()
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &PayLoad{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("JWT ERROR")
 		}
@@ -54,12 +57,27 @@ func VaildAccessToken(tokenString string) {
 		panic(err)
 	}
 
-	var payload struct {
-		UserEmail string
-		UserCall  string
+	if claims, ok := token.Claims.(*PayLoad); ok && token.Valid {
+		return claims
+	} else {
+		return nil
 	}
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		_ = mapstructure.Decode(claims, &payload)
+}
+func DecodeRereshToken(tokenString string) *PayLoad {
+	cfg := config.New()
+	token, err := jwt.ParseWithClaims(tokenString, &PayLoad{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("JWT ERROR")
+		}
+		return []byte(cfg.GetJwtRefreshSecret()), nil
+	})
+	if err != nil {
+		panic(err)
 	}
-	fmt.Println(payload)
+
+	if claims, ok := token.Claims.(*PayLoad); ok && token.Valid {
+		return claims
+	} else {
+		return nil
+	}
 }

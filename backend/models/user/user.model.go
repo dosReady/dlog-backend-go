@@ -54,6 +54,10 @@ func SignedUser(c *gin.Context) string {
 }
 
 func AuthenticationUser(tokenString string) string {
-	jwt.VaildAccessToken(tokenString)
-	return ""
+	decode := jwt.DecodeAccessToken(tokenString)
+	if decode != nil {
+		return jwt.CreateAccessToken(&decode)
+	} else {
+		return ""
+	}
 }
