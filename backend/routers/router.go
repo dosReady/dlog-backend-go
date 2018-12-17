@@ -36,5 +36,6 @@ func SettingRouters(r *gin.Engine) {
 	api := r.Group("/api")
 	{
 		api.POST("/dlog", dlogCtrl.UserSelect)
+		api.POST("/dlog/login", dlogCtrl.UserLogin)
 	}
 }

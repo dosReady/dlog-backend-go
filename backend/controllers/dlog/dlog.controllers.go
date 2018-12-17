@@ -16,3 +16,8 @@ func UserSelect(c *gin.Context) {
 	result := userModel.UserList()
 	c.JSON(http.StatusOK, gin.H{"name": result})
 }
+
+func UserLogin(c *gin.Context) {
+	accesstoken := userModel.SignedUser(c)
+	c.JSON(http.StatusOK, gin.H{"name": accesstoken})
+}

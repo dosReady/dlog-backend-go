@@ -1,7 +1,6 @@
 package dao
 
 import (
-	"encoding/json"
 	"fmt"
 
 	config "github.com/dosReady/dlog/backend/modules/config"
@@ -10,7 +9,8 @@ import (
 )
 
 func GetConnection() *gorm.DB {
-	db, err := gorm.Open("mysql", config.GetDbURL())
+	c := config.New()
+	db, err := gorm.Open("mysql", c.GetDbURL())
 	if err != nil {
 		fmt.Println("ERROR")
 		fmt.Println(err)
@@ -19,6 +19,8 @@ func GetConnection() *gorm.DB {
 	}
 	return db
 }
+
+/*
 func List(ref interface{}, sqlstr string, values ...interface{}) {
 	conn := GetConnection()
 	rows, err := conn.Raw(sqlstr, values...).Rows()
@@ -51,3 +53,4 @@ func List(ref interface{}, sqlstr string, values ...interface{}) {
 		panic(err)
 	}
 }
+*/
