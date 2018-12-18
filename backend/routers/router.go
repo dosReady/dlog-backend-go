@@ -17,8 +17,8 @@ func SettingRouters(r *gin.Engine) {
 		api.POST("/login", dlogCtrl.UserLogin)
 	}
 	apitest := r.Group("/test")
+	apitest.Use(middleware.CertifiedMdlw())
 	{
-		apitest.Use(middleware.CertifiedMdlw())
 		apitest.POST("/echo", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{"name": "123"})
 		})

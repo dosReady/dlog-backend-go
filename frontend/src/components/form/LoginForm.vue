@@ -7,6 +7,8 @@
 </template>
 
 <script>
+const USER_NOTFOUND = 1
+const USER_NOTMATCH = 2
 export default {
   name: 'LoginForm',
   data () {
@@ -19,8 +21,21 @@ export default {
   },
   methods: {
     async btnLogin () {
-      const data = await this.$http.post('/api/dlog/login', {'login': this.logindata})
-      alert(data)
+      const data = await this.$http('/api/dlog/login', this.logindata)
+      const token = data.accessToken
+      const status = data.status
+      if (!token) {
+        switch (status) {
+          case USER_NOTFOUND:
+            alert('사용자를 찾을수 없습니다.')
+            break
+          case USER_NOTMATCH:
+            alert('사용자 정보가 일치하지 않습니다.')
+        }
+      } else {
+        console.log(token)
+        this.$cookie.set('token', token, Infinity)
+      }
     }
   }
 }

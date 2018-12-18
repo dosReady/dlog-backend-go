@@ -7,14 +7,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-//https://www.curioustore.com/#!/
+// https://www.curioustore.com/#!/
+// 변수명 작명 사이트
 func CertifiedMdlw() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		result := userModel.AuthenticationUser(c)
-		m := make(map[string]interface{})
-		m["auth"] = result
-		c.Keys = m
-		c.Next()
+		if result := userModel.AuthenticationUser(c); result != "" {
+			m := make(map[string]interface{})
+			m["auth"] = result
+			c.Keys = m
+			c.Next()
+		} else {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{})
+		}
 	}
 }
 

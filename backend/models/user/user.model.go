@@ -18,11 +18,10 @@ type DlogUser struct {
 	common.Base
 }
 
-// API 파라미터 데이터
-type BodyData struct {
-	Email string
-	Pwd   string
-}
+const (
+	UserNotFound int = 1
+	UserNotMatch int = 2
+)
 
 func UserList() *[]DlogUser {
 	users := make([]DlogUser, 0)
@@ -32,30 +31,42 @@ func UserList() *[]DlogUser {
 	return &users
 }
 
-func SignedUser(c *gin.Context) string {
+func SignedUser(c *gin.Context) (string, int) {
 	var user DlogUser
-	var bodyData BodyData
+	var bodyData struct {
+		Email, Pwd string
+	}
 	_ = c.ShouldBindJSON(&bodyData)
-
 	conn := dao.GetConnection()
-	conn.Select("user_email, user_call").Find(&user)
-	accessToken := jwt.CreateAccessToken(&user)
-	refreshToken := jwt.CreateRefreshToken(&user)
-	conn.Model(&user).Where(DlogUser{
-		UserEmail: user.UserEmail,
-	}).Update(DlogUser{
-		RefreshToken: refreshToken,
-		Base: common.Base{
-			UpdateDate: time.Now(),
-		},
-	})
-	conn.Close()
-	return accessToken
+	defer conn.Close()
+	conn.Select("user_email, user_password, user_call").Where(DlogUser{
+		UserEmail: bodyData.Email,
+	}).Find(&user)
+
+	if user != (DlogUser{}) {
+		if user.UserPassword == bodyData.Pwd {
+			accessToken := jwt.CreateAccessToken(&user)
+			refreshToken := jwt.CreateRefreshToken(&user)
+			conn.Model(&user).Where(DlogUser{
+				UserEmail: user.UserEmail,
+			}).Update(DlogUser{
+				RefreshToken: refreshToken,
+				Base: common.Base{
+					UpdateDate: time.Now(),
+				},
+			})
+			return accessToken, 0
+		} else {
+			return "", UserNotMatch
+		}
+	}
+
+	return "", UserNotFound
 }
 
 // 1. accesstoken 검증
 // 2. refreshtoken 검증
-// 3. accessToken 재발급
+// 3. 검증: accesstoken 재 발급, 유효하지않은 검증: 빈 문자열
 func AuthenticationUser(c *gin.Context) string {
 	var param struct {
 		Token string
@@ -64,13 +75,14 @@ func AuthenticationUser(c *gin.Context) string {
 	_ = c.ShouldBindJSON(&param)
 
 	var user DlogUser
-	decode := jwt.VaildAccessToken(param.Token)
-	if decode == nil {
+	// 만료될때만 재 발급 로직 수행
+	if _, err := jwt.VaildAccessToken(param.Token); err.Code == jwt.EXPIRED {
 		conn := dao.GetConnection()
 		conn.Where(DlogUser{
 			UserEmail: param.Email,
 		}).Find(&user)
-		if decodeRefresh := jwt.VaildRefreshToken(user.RefreshToken); decodeRefresh != nil {
+
+		if _, err := jwt.VaildRefreshToken(user.RefreshToken); err != nil {
 			var data = struct {
 				UserEmail string
 				UserCall  string
