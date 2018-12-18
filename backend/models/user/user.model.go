@@ -1,6 +1,8 @@
 package user
 
 import (
+	"encoding/json"
+	"fmt"
 	"time"
 
 	common "github.com/dosReady/dlog/backend/models/common"
@@ -72,7 +74,7 @@ func AuthenticationUser(c *gin.Context) string {
 		Token string
 		Email string
 	}
-	_ = c.BindJSON(&param)
+	_ = c.ShouldBindJSON(&param)
 
 	var user DlogUser
 	// 만료될때만 재 발급 로직 수행
@@ -101,6 +103,8 @@ func Create(c *gin.Context) {
 	var param struct {
 		Email string
 		Pwd   string
+	}{
+		Email: 
 	}
 	_ = c.ShouldBindJSON(&param)
 	conn := dao.GetConnection()

@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	userModel "github.com/dosReady/dlog/backend/models/user"
@@ -15,7 +14,7 @@ func BodyParser() gin.HandlerFunc {
 		decoder := json.NewDecoder(c.Request.Body)
 		defer c.Request.Body.Close()
 		_ = decoder.Decode(&m)
-		fmt.Println(m)
+		c.Set("body", m)
 		c.Next()
 	}
 }
