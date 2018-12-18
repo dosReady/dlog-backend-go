@@ -72,7 +72,7 @@ func AuthenticationUser(c *gin.Context) string {
 		Token string
 		Email string
 	}
-	_ = c.ShouldBindJSON(&param)
+	_ = c.BindJSON(&param)
 
 	var user DlogUser
 	// 만료될때만 재 발급 로직 수행
@@ -95,4 +95,22 @@ func AuthenticationUser(c *gin.Context) string {
 	}
 
 	return ""
+}
+
+func Create(c *gin.Context) {
+	var param struct {
+		Email string
+		Pwd   string
+	}
+	_ = c.ShouldBindJSON(&param)
+	conn := dao.GetConnection()
+	if err := conn.Create(DlogUser{UserEmail: param.Email, UserPassword: param.Pwd}).Error; err != nil {
+		panic(err)
+	}
+}
+func Delete(email string) {
+	conn := dao.GetConnection()
+	if err := conn.Where(DlogUser{UserEmail: email}).Delete(DlogUser{}).Error; err != nil {
+		panic(err)
+	}
 }

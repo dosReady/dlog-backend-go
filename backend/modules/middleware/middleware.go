@@ -1,20 +1,31 @@
 package middleware
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 
 	userModel "github.com/dosReady/dlog/backend/models/user"
 	"github.com/gin-gonic/gin"
 )
 
+func BodyParser() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var m map[string]interface{}
+		decoder := json.NewDecoder(c.Request.Body)
+		defer c.Request.Body.Close()
+		_ = decoder.Decode(&m)
+		fmt.Println(m)
+		c.Next()
+	}
+}
+
 // https://www.curioustore.com/#!/
 // 변수명 작명 사이트
 func CertifiedMdlw() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if result := userModel.AuthenticationUser(c); result != "" {
-			m := make(map[string]interface{})
-			m["auth"] = result
-			c.Keys = m
+			c.Set("auth", result)
 			c.Next()
 		} else {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{})

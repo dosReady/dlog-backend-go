@@ -3,19 +3,29 @@ package router
 import (
 	"net/http"
 
-	dlogCtrl "github.com/dosReady/dlog/backend/controllers/dlog"
+	commonCtrl "github.com/dosReady/dlog/backend/controllers/common"
+	userCtrl "github.com/dosReady/dlog/backend/controllers/user"
 	middleware "github.com/dosReady/dlog/backend/modules/middleware"
 	"github.com/gin-gonic/gin"
 )
 
 func SettingRouters(r *gin.Engine) {
 	r.Use(middleware.VerificationURL())
+	r.Use(middleware.BodyParser())
 	r.Use(gin.Recovery())
 
-	api := r.Group("/api/dlog")
+	apir1 := r.Group("/api/dlog")
 	{
-		api.POST("/login", dlogCtrl.UserLogin)
+		apir1.POST("/login", commonCtrl.UserLogin)
+		apir1.POST("/logout", commonCtrl.UserLogin)
 	}
+
+	apir2 := r.Group("/api/user", middleware.CertifiedMdlw())
+	{
+		apir2.POST("/create", userCtrl.UserCreate)
+		apir2.POST("/delete/:email", userCtrl.UserDelete)
+	}
+
 	apitest := r.Group("/test")
 	apitest.Use(middleware.CertifiedMdlw())
 	{
