@@ -1,11 +1,15 @@
 package modules
 
 import (
+	"encoding/base64"
 	"fmt"
 	"time"
 
+	"golang.org/x/crypto/scrypt"
+
 	jwt "github.com/dgrijalva/jwt-go"
 	config "github.com/dosReady/dlog/backend/modules/config"
+	"github.com/rs/xid"
 )
 
 type JwtException struct {
@@ -15,6 +19,7 @@ type JwtException struct {
 const (
 	INVAILD uint32 = 20
 	EXPIRED uint32 = 16
+	PASS    uint32 = 0
 )
 
 func (je JwtException) Error() string {
@@ -30,18 +35,21 @@ func (je JwtException) Error() string {
 
 type PayLoad struct {
 	Data interface{}
+	Xid  string
 	jwt.StandardClaims
 }
 
-func CreateAccessToken(obj interface{}) string {
+func CreateAccessToken(obj interface{}) (string, string) {
 	cfg := config.New()
-
-	if payload, ok := obj.(PayLoad); ok {
-		obj = payload.Data
-	}
+	var base64xid string
+	xidval := []byte(xid.New().String())
+	xidsecret := []byte(cfg.GetXIDSecret())
+	xidstr, _ := scrypt.Key(xidval, xidsecret, 32768, 8, 1, 32)
+	base64xid = base64.StdEncoding.EncodeToString(xidstr)
 
 	payload := PayLoad{
 		Data: obj,
+		Xid:  base64xid,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Minute * 1).Unix(),
 			Issuer:    "dlog",
@@ -49,7 +57,7 @@ func CreateAccessToken(obj interface{}) string {
 	}
 	token := jwt.NewWithClaims(jwt.GetSigningMethod(cfg.GetAlg()), &payload)
 	tokenstr, _ := token.SignedString([]byte(cfg.GetJwtAccessSecret()))
-	return tokenstr
+	return tokenstr, string(xidval)
 }
 func CreateRefreshToken(obj interface{}) string {
 	cfg := config.New()
@@ -90,18 +98,20 @@ func _decodeToken(tokenString string, secret string) (*PayLoad, *JwtException) {
 		}
 		return []byte(secret), nil
 	})
+
+	var exception JwtException
 	if err != nil {
 		parseE, _ := err.(*jwt.ValidationError)
 		if parseE.Errors == EXPIRED {
-			return nil, &JwtException{Code: EXPIRED}
+			exception = JwtException{Code: EXPIRED}
 		} else {
-			return nil, &JwtException{Code: INVAILD}
+			exception = JwtException{Code: INVAILD}
 		}
 	}
 
 	if claims, ok := token.Claims.(*PayLoad); ok && token.Valid {
 		return claims, nil
 	} else {
-		return nil, &JwtException{Code: INVAILD}
+		return nil, &exception
 	}
 }

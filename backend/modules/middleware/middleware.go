@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	userModel "github.com/dosReady/dlog/backend/models/user"
+	jwt "github.com/dosReady/dlog/backend/modules/jwt"
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,12 +24,14 @@ func BodyParser() gin.HandlerFunc {
 // 변수명 작명 사이트
 func CertifiedMdlw() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if result := userModel.AuthenticationUser(c); result != "" {
+		result, status := userModel.AuthenticationUser(c)
+		if status == jwt.INVAILD {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "토큰이 유효하지않습니다."})
+		} else if status == jwt.EXPIRED {
 			c.Set("auth", result)
 			c.Next()
-		} else {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{})
 		}
+
 	}
 }
 

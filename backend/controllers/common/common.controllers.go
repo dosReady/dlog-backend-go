@@ -18,9 +18,6 @@ func UserSelect(c *gin.Context) {
 }
 
 func UserLogin(c *gin.Context) {
-	if accesstoken, status := userModel.SignedUser(c); status > 0 {
-		c.JSON(http.StatusOK, gin.H{"accessToken": "", "status": status})
-	} else {
-		c.JSON(http.StatusOK, gin.H{"accessToken": accesstoken, "status": 0})
-	}
+	authData, status := userModel.SignedUser(c)
+	c.JSON(http.StatusOK, gin.H{"auth": authData, "status": status})
 }

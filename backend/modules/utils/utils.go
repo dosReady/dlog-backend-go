@@ -1,6 +1,8 @@
 package utils
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 func EncodingJson(value interface{}) []byte {
 	jsonBytes, err := json.Marshal(value)

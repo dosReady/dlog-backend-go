@@ -19,6 +19,7 @@ type Config struct {
 		Accesssecret  string
 		Refreshsecret string
 		Alg           string
+		Xidsecret     string
 	}
 }
 
@@ -43,4 +44,7 @@ func (c Config) GetJwtRefreshSecret() string {
 }
 func (c Config) GetAlg() string {
 	return c.Jwt.Alg
+}
+func (c Config) GetXIDSecret() string {
+	return c.Jwt.Xidsecret
 }
