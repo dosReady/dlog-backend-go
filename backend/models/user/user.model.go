@@ -6,7 +6,9 @@ import (
 	common "github.com/dosReady/dlog/backend/models/common"
 	dao "github.com/dosReady/dlog/backend/modules/dao"
 	jwt "github.com/dosReady/dlog/backend/modules/jwt"
+	"github.com/fatih/structs"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 )
 
 // DB MODEL
@@ -16,11 +18,6 @@ type DlogUser struct {
 	UserCall     string `json:"user_call,omitempty"`
 	RefreshToken string `json:"refresh_token,omitempty"`
 	common.Base
-}
-
-type AuthData struct {
-	AccessToken string
-	Id          string
 }
 
 const (
@@ -35,8 +32,30 @@ func UserList() *[]DlogUser {
 	conn.Close()
 	return &users
 }
+func _generateToken(user DlogUser, conn *gorm.DB) string {
+	var obj = struct {
+		UserEmail string
+		UserCall  string
+	}{
+		UserEmail: user.UserEmail,
+		UserCall:  user.UserCall,
+	}
+	accessDataMap := structs.Map(obj)
+	accessToken, xidval := jwt.CreateAccessToken(accessDataMap)
+	refreshToken := jwt.CreateRefreshToken(xidval)
 
-func SignedUser(c *gin.Context) (*AuthData, int) {
+	conn.Model(&user).Where(DlogUser{
+		UserEmail: user.UserEmail,
+	}).Update(DlogUser{
+		RefreshToken: refreshToken,
+		Base: common.Base{
+			UpdateDate: time.Now(),
+		},
+	})
+	return accessToken
+}
+
+func SignedUser(c *gin.Context) (string, int) {
 	if body, exists := c.Get("body"); exists {
 		body, _ := body.(map[string]interface{})
 		email := body["email"].(string)
@@ -50,67 +69,38 @@ func SignedUser(c *gin.Context) (*AuthData, int) {
 
 		if user != (DlogUser{}) {
 			if user.UserPassword == pwd {
-				accessToken, xidval := jwt.CreateAccessToken(DlogUser{
-					UserEmail: user.UserEmail,
-					UserCall:  user.UserCall,
-				})
-				refreshToken := jwt.CreateRefreshToken(xidval)
-				conn.Model(&user).Where(DlogUser{
-					UserEmail: user.UserEmail,
-				}).Update(DlogUser{
-					RefreshToken: refreshToken,
-					Base: common.Base{
-						UpdateDate: time.Now(),
-					},
-				})
-
-				authData := AuthData{
-					AccessToken: accessToken,
-					Id:          xidval,
-				}
-
-				return &authData, 0
+				accessToken := _generateToken(user, conn)
+				return accessToken, 0
 			} else {
-				return nil, UserNotMatch
+				return "", UserNotMatch
 			}
 		}
 	}
 
-	return nil, UserNotFound
+	return "", UserNotFound
 }
 
 // 1. accesstoken 검증
 // 2. refreshtoken 검증
 // 3. 검증: accesstoken 재 발급, 유효하지않은 검증: 빈 문자열
 func AuthenticationUser(c *gin.Context) (string, uint32) {
-	var resultTkn string
+	var accessToken string
 	var status uint32
 
 	if body, exists := c.Get("body"); exists {
 		body := body.(map[string]interface{})
 		token := body["token"].(string)
-		email := " "
-		if body["email"] != nil {
-			email = body["email"].(string)
-		}
 
 		var user DlogUser
 		// 만료될때만 재 발급 로직 수행
-		if decode, err := jwt.VaildAccessToken(token); err.Code == jwt.EXPIRED {
+		if _, err := jwt.VaildAccessToken(token); err.Code == jwt.EXPIRED {
 			conn := dao.GetConnection()
 			conn.Where(DlogUser{
-				UserEmail: email,
+				UserEmail: " ",
 			}).Find(&user)
 			if user != (DlogUser{}) {
 				if _, err := jwt.VaildRefreshToken(user.RefreshToken); err == nil {
-					var data = struct {
-						UserEmail string
-						UserCall  string
-					}{
-						UserEmail: user.UserEmail,
-						UserCall:  user.UserCall,
-					}
-					resultTkn, _ = jwt.CreateAccessToken(&data)
+					accessToken = _generateToken(user, conn)
 					status = jwt.EXPIRED
 				}
 			} else {
@@ -121,7 +111,7 @@ func AuthenticationUser(c *gin.Context) (string, uint32) {
 		}
 	}
 
-	return resultTkn, status
+	return accessToken, status
 }
 
 func Create(c *gin.Context) {

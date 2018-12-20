@@ -34,12 +34,12 @@ func (je JwtException) Error() string {
 }
 
 type PayLoad struct {
-	Data interface{}
+	Data map[string]interface{}
 	Xid  string
 	jwt.StandardClaims
 }
 
-func CreateAccessToken(obj interface{}) (string, string) {
+func CreateAccessToken(obj map[string]interface{}) (string, string) {
 	cfg := config.New()
 	var base64xid string
 	xidval := []byte(xid.New().String())
@@ -59,10 +59,10 @@ func CreateAccessToken(obj interface{}) (string, string) {
 	tokenstr, _ := token.SignedString([]byte(cfg.GetJwtAccessSecret()))
 	return tokenstr, string(xidval)
 }
-func CreateRefreshToken(obj interface{}) string {
+func CreateRefreshToken(xidval string) string {
 	cfg := config.New()
 	payload := PayLoad{
-		Data: obj,
+		Xid: xidval,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().AddDate(0, 30, 0).Unix(),
 			Issuer:    "dlog",
@@ -75,24 +75,17 @@ func CreateRefreshToken(obj interface{}) string {
 func VaildAccessToken(tokenString string) (*PayLoad, *JwtException) {
 	cfg := config.New()
 	decodeAccess, err := _decodeToken(tokenString, cfg.GetJwtAccessSecret())
-	if err != nil {
-		return nil, err
-	} else {
-		return decodeAccess, nil
-	}
+	return decodeAccess, err
 }
 func VaildRefreshToken(tokenString string) (*PayLoad, *JwtException) {
 	cfg := config.New()
 	decdoeRefresh, err := _decodeToken(tokenString, cfg.GetJwtRefreshSecret())
-	if err != nil {
-		return nil, err
-	} else {
-		return decdoeRefresh, nil
-	}
+	return decdoeRefresh, err
 }
 
 func _decodeToken(tokenString string, secret string) (*PayLoad, *JwtException) {
-	token, err := jwt.ParseWithClaims(tokenString, &PayLoad{}, func(token *jwt.Token) (interface{}, error) {
+	var payLoad PayLoad
+	token, err := jwt.ParseWithClaims(tokenString, &payLoad, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, &JwtException{Code: INVAILD}
 		}
@@ -108,10 +101,9 @@ func _decodeToken(tokenString string, secret string) (*PayLoad, *JwtException) {
 			exception = JwtException{Code: INVAILD}
 		}
 	}
-
-	if claims, ok := token.Claims.(*PayLoad); ok && token.Valid {
-		return claims, nil
-	} else {
-		return nil, &exception
+	if !token.Valid {
+		exception = JwtException{Code: INVAILD}
 	}
+
+	return &payLoad, &exception
 }
