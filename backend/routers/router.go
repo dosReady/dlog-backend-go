@@ -26,11 +26,11 @@ func SettingRouters(r *gin.Engine) {
 		apir2.POST("/delete/:email", userCtrl.UserDelete)
 	}
 
-	apitest := r.Group("/test")
+	apitest := r.Group("/api/test")
 	apitest.Use(middleware.CertifiedMdlw())
 	{
 		apitest.POST("/echo", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{"name": "123"})
+			c.JSON(http.StatusOK, gin.H{"name": "Hi"})
 		})
 	}
 }

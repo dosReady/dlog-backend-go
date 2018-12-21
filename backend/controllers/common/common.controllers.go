@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	userModel "github.com/dosReady/dlog/backend/models/user"
+	utils "github.com/dosReady/dlog/backend/modules/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,5 +20,6 @@ func UserSelect(c *gin.Context) {
 
 func UserLogin(c *gin.Context) {
 	authData, status := userModel.SignedUser(c)
-	c.JSON(http.StatusOK, gin.H{"auth": authData, "status": status})
+	utils.SetCookie("token", authData, c)
+	c.JSON(http.StatusOK, gin.H{"token": authData, "status": status})
 }

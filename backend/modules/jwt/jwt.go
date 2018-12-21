@@ -1,14 +1,12 @@
 package modules
 
 import (
-	"encoding/base64"
 	"fmt"
 	"time"
 
-	"golang.org/x/crypto/scrypt"
-
 	jwt "github.com/dgrijalva/jwt-go"
 	config "github.com/dosReady/dlog/backend/modules/config"
+	utils "github.com/dosReady/dlog/backend/modules/utils"
 	"github.com/rs/xid"
 )
 
@@ -34,58 +32,58 @@ func (je JwtException) Error() string {
 }
 
 type PayLoad struct {
-	Data map[string]interface{}
+	Data []byte
 	Xid  string
 	jwt.StandardClaims
 }
 
-func CreateAccessToken(obj map[string]interface{}) (string, string) {
+func CreateAccessToken(obj interface{}) (string, string) {
 	cfg := config.New()
-	var base64xid string
-	xidval := []byte(xid.New().String())
-	xidsecret := []byte(cfg.GetXIDSecret())
-	xidstr, _ := scrypt.Key(xidval, xidsecret, 32768, 8, 1, 32)
-	base64xid = base64.StdEncoding.EncodeToString(xidstr)
+	xidstr := xid.New().String()
+	jsonobj := utils.EncodingJson(obj)
 
 	payload := PayLoad{
-		Data: obj,
-		Xid:  base64xid,
+		Data: jsonobj,
+		Xid:  xidstr,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Minute * 1).Unix(),
+			ExpiresAt: time.Now().Add(time.Millisecond * 1000).Unix(),
 			Issuer:    "dlog",
 		},
 	}
 	token := jwt.NewWithClaims(jwt.GetSigningMethod(cfg.GetAlg()), &payload)
 	tokenstr, _ := token.SignedString([]byte(cfg.GetJwtAccessSecret()))
-	return tokenstr, string(xidval)
+	return tokenstr, xidstr
 }
 func CreateRefreshToken(xidval string) string {
 	cfg := config.New()
-	payload := PayLoad{
+	payload := struct {
+		Xid string
+		jwt.StandardClaims
+	}{
 		Xid: xidval,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().AddDate(0, 30, 0).Unix(),
 			Issuer:    "dlog",
 		},
 	}
-	token := jwt.NewWithClaims(jwt.GetSigningMethod(cfg.GetAlg()), &payload)
+	token := jwt.NewWithClaims(jwt.GetSigningMethod(cfg.GetAlg()), payload)
 	tokenstr, _ := token.SignedString([]byte(cfg.GetJwtRefreshSecret()))
 	return tokenstr
 }
-func VaildAccessToken(tokenString string) (*PayLoad, *JwtException) {
+func VaildAccessToken(tokenString string) (*PayLoad, uint32) {
 	cfg := config.New()
 	decodeAccess, err := _decodeToken(tokenString, cfg.GetJwtAccessSecret())
 	return decodeAccess, err
 }
-func VaildRefreshToken(tokenString string) (*PayLoad, *JwtException) {
+func VaildRefreshToken(tokenString string) (*PayLoad, uint32) {
 	cfg := config.New()
 	decdoeRefresh, err := _decodeToken(tokenString, cfg.GetJwtRefreshSecret())
 	return decdoeRefresh, err
 }
 
-func _decodeToken(tokenString string, secret string) (*PayLoad, *JwtException) {
-	var payLoad PayLoad
-	token, err := jwt.ParseWithClaims(tokenString, &payLoad, func(token *jwt.Token) (interface{}, error) {
+func _decodeToken(tokenString string, secret string) (*PayLoad, uint32) {
+	var payload PayLoad
+	token, err := jwt.ParseWithClaims(tokenString, &payload, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, &JwtException{Code: INVAILD}
 		}
@@ -100,10 +98,9 @@ func _decodeToken(tokenString string, secret string) (*PayLoad, *JwtException) {
 		} else {
 			exception = JwtException{Code: INVAILD}
 		}
-	}
-	if !token.Valid {
+	} else if !token.Valid {
 		exception = JwtException{Code: INVAILD}
 	}
 
-	return &payLoad, &exception
+	return &payload, exception.Code
 }

@@ -6,7 +6,7 @@ import (
 	common "github.com/dosReady/dlog/backend/models/common"
 	dao "github.com/dosReady/dlog/backend/modules/dao"
 	jwt "github.com/dosReady/dlog/backend/modules/jwt"
-	"github.com/fatih/structs"
+	"github.com/dosReady/dlog/backend/modules/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 )
@@ -40,8 +40,7 @@ func _generateToken(user DlogUser, conn *gorm.DB) string {
 		UserEmail: user.UserEmail,
 		UserCall:  user.UserCall,
 	}
-	accessDataMap := structs.Map(obj)
-	accessToken, xidval := jwt.CreateAccessToken(accessDataMap)
+	accessToken, xidval := jwt.CreateAccessToken(obj)
 	refreshToken := jwt.CreateRefreshToken(xidval)
 
 	conn.Model(&user).Where(DlogUser{
@@ -86,27 +85,33 @@ func SignedUser(c *gin.Context) (string, int) {
 func AuthenticationUser(c *gin.Context) (string, uint32) {
 	var accessToken string
 	var status uint32
-
-	if body, exists := c.Get("body"); exists {
-		body := body.(map[string]interface{})
-		token := body["token"].(string)
-
+	token, tokenErr := c.Cookie("token")
+	if tokenErr != nil {
+		status = jwt.INVAILD
+	} else {
 		var user DlogUser
 		// 만료될때만 재 발급 로직 수행
-		if _, err := jwt.VaildAccessToken(token); err.Code == jwt.EXPIRED {
+		if decodeAccess, accessErr := jwt.VaildAccessToken(token); accessErr == jwt.EXPIRED {
+			var accessPayLoad struct {
+				UserEmail string
+			}
+			utils.DecodingJson(decodeAccess.Data, &accessPayLoad)
 			conn := dao.GetConnection()
 			conn.Where(DlogUser{
-				UserEmail: " ",
+				UserEmail: accessPayLoad.UserEmail,
 			}).Find(&user)
 			if user != (DlogUser{}) {
-				if _, err := jwt.VaildRefreshToken(user.RefreshToken); err == nil {
+				decodeRefresh, refreshErr := jwt.VaildRefreshToken(user.RefreshToken)
+				if refreshErr == 0 && decodeAccess.Xid == decodeRefresh.Xid {
 					accessToken = _generateToken(user, conn)
 					status = jwt.EXPIRED
+				} else {
+					status = jwt.INVAILD
 				}
 			} else {
 				status = jwt.INVAILD
 			}
-		} else if err.Code == jwt.INVAILD {
+		} else {
 			status = jwt.INVAILD
 		}
 	}

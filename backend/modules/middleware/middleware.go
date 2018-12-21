@@ -6,6 +6,7 @@ import (
 
 	userModel "github.com/dosReady/dlog/backend/models/user"
 	jwt "github.com/dosReady/dlog/backend/modules/jwt"
+	"github.com/dosReady/dlog/backend/modules/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -28,7 +29,9 @@ func CertifiedMdlw() gin.HandlerFunc {
 		if status == jwt.INVAILD {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "토큰이 유효하지않습니다."})
 		} else if status == jwt.EXPIRED {
-			c.Set("auth", result)
+			utils.SetCookie("token", result, true, c)
+			c.Next()
+		} else {
 			c.Next()
 		}
 

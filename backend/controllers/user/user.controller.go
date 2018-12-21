@@ -15,5 +15,5 @@ func UserCreate(c *gin.Context) {
 func UserDelete(c *gin.Context) {
 	email := c.Param("email")
 	userModel.Delete(email)
-	c.JSON(http.StatusOK, gin.H{})
+
 }
