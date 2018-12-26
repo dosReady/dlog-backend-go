@@ -1,7 +1,12 @@
 <template>
   <div id="default-layout">
-    <div class="left-container">
-    </div>
+    <header class="left-container">
+        <div class="login-info" v-if="user != null">
+            <label>{{user.Email}}</label>
+            <button class="btn" @click="logout">로그아웃</button>
+            <button class="btn" @click="test">테스트</button>
+        </div>
+    </header>
     <div class="content-container">
       <slot></slot>
     </div>
@@ -10,7 +15,26 @@
 
 <script>
 export default {
-  name: 'DefaultLayout'
+  name: 'DefaultLayout',
+  data () {
+    return {
+      user: {}
+    }
+  },
+  created () {
+    let user = JSON.parse(this.$cookie.get('user'))
+    this.user = user
+    console.log(user)
+  },
+  methods: {
+    async logout () {
+      await this.$http('/api/user/logout')
+      this.$router.push('/')
+    },
+    async test () {
+      await this.$http('/api/test/echo')
+    }
+  }
 }
 </script>
 
@@ -26,6 +50,12 @@ export default {
     height: 100%;
     background-image: url("~@/assests/images/bg.jpg");
     position: fixed;
+    .login-info {
+        margin: 30rem auto;
+        button {
+            margin-top: 1rem;
+        }
+    }
   }
   .content-container {
     margin-left: 35%;

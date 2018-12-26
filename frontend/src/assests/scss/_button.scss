@@ -1,0 +1,11 @@
+.btn {
+    color: white;
+    background-color: navy!important;
+    user-select: none;
+    &:not(:disabled):not(.disabled) {
+        cursor: pointer;
+    }
+    &:hover {
+        background-color: rgb(40, 40, 131)!important;
+    }
+}

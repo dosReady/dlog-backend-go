@@ -9,6 +9,7 @@ import 'es6-promise/auto'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faUser, faKey } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { stroe } from './store'
 
 library.add(faUser, faKey)
 
@@ -32,5 +33,6 @@ new Vue({
   el: '#app',
   router,
   components: { App },
-  template: '<App/>'
+  template: '<App/>',
+  stroe
 })
