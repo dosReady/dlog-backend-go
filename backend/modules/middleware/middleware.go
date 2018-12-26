@@ -29,7 +29,7 @@ func CertifiedMdlw() gin.HandlerFunc {
 		if status == jwt.INVAILD {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "토큰이 유효하지않습니다."})
 		} else if status == jwt.EXPIRED {
-			utils.SetCookie("token", result, true, c)
+			utils.SetCookieWithHttpOnly("token", result, c)
 			c.Next()
 		} else {
 			c.Next()

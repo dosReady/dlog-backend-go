@@ -1,6 +1,9 @@
 package user
 
 import (
+	"encoding/json"
+	"errors"
+	"fmt"
 	"time"
 
 	common "github.com/dosReady/dlog/backend/models/common"
@@ -19,11 +22,6 @@ type DlogUser struct {
 	RefreshToken string `json:"refresh_token,omitempty"`
 	common.Base
 }
-
-const (
-	UserNotFound int = 1
-	UserNotMatch int = 2
-)
 
 func UserList() *[]DlogUser {
 	users := make([]DlogUser, 0)
@@ -54,7 +52,7 @@ func _generateToken(user DlogUser, conn *gorm.DB) string {
 	return accessToken
 }
 
-func SignedUser(c *gin.Context) (string, int) {
+func SignedUser(c *gin.Context) error {
 	if body, exists := c.Get("body"); exists {
 		body, _ := body.(map[string]interface{})
 		email := body["email"].(string)
@@ -65,18 +63,25 @@ func SignedUser(c *gin.Context) (string, int) {
 		conn.Select("user_email, user_password, user_call").Where(DlogUser{
 			UserEmail: email,
 		}).Find(&user)
-
 		if user != (DlogUser{}) {
 			if user.UserPassword == pwd {
 				accessToken := _generateToken(user, conn)
-				return accessToken, 0
+				utils.SetCookieWithHttpOnly("token", accessToken, c)
+				userData := struct {
+					Email string
+				}{
+					Email: email,
+				}
+				userDataJson, _ := json.Marshal(&userData)
+				utils.SetCookie("user", string(userDataJson), c)
+				return nil
 			} else {
-				return "", UserNotMatch
+				return errors.New("패스워드가 일치하지 않습니다.")
 			}
 		}
 	}
 
-	return "", UserNotFound
+	return errors.New("사용자 정보가 없습니다.")
 }
 
 // 1. accesstoken 검증
@@ -86,6 +91,7 @@ func AuthenticationUser(c *gin.Context) (string, uint32) {
 	var accessToken string
 	var status uint32
 	token, tokenErr := c.Cookie("token")
+	fmt.Println(token)
 	if tokenErr != nil {
 		status = jwt.INVAILD
 	} else {
@@ -100,6 +106,7 @@ func AuthenticationUser(c *gin.Context) (string, uint32) {
 			conn.Where(DlogUser{
 				UserEmail: accessPayLoad.UserEmail,
 			}).Find(&user)
+			// 토큰이 가지고있던 사용자이메일로 조회하여 사용자정보 존재여부 체크
 			if user != (DlogUser{}) {
 				decodeRefresh, refreshErr := jwt.VaildRefreshToken(user.RefreshToken)
 				if refreshErr == 0 && decodeAccess.Xid == decodeRefresh.Xid {
@@ -111,7 +118,7 @@ func AuthenticationUser(c *gin.Context) (string, uint32) {
 			} else {
 				status = jwt.INVAILD
 			}
-		} else {
+		} else if accessErr == jwt.INVAILD {
 			status = jwt.INVAILD
 		}
 	}

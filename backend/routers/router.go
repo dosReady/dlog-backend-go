@@ -14,22 +14,20 @@ func SettingRouters(r *gin.Engine) {
 	r.Use(middleware.BodyParser())
 	r.Use(gin.Recovery())
 
-	apir1 := r.Group("/api/dlog")
-	{
-		apir1.POST("/login", commonCtrl.UserLogin)
-		apir1.POST("/logout", commonCtrl.UserLogin)
-	}
+	r.POST("/api/user/login", commonCtrl.UserLogin)
 
-	apir2 := r.Group("/api/user", middleware.CertifiedMdlw())
+	apir1 := r.Group("/api/user", middleware.CertifiedMdlw())
 	{
-		apir2.POST("/create", userCtrl.UserCreate)
-		apir2.POST("/delete/:email", userCtrl.UserDelete)
+		apir1.POST("/create", userCtrl.UserCreate)
+		apir1.POST("/delete/:email", userCtrl.UserDelete)
+		apir1.POST("/logout", commonCtrl.UserLogout)
 	}
 
 	apitest := r.Group("/api/test")
 	apitest.Use(middleware.CertifiedMdlw())
 	{
 		apitest.POST("/echo", func(c *gin.Context) {
+
 			c.JSON(http.StatusOK, gin.H{"name": "Hi"})
 		})
 	}

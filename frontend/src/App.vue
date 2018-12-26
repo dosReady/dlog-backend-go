@@ -14,6 +14,6 @@ export default {
 }
 </script>
 
-<style>
-#app {}
+<style lang="scss">
+@import "~@/assests/scss/main.scss";
 </style>

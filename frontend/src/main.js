@@ -6,6 +6,13 @@ import router from './router'
 import axios from 'axios'
 import VueCookie from 'vue-cookie'
 import 'es6-promise/auto'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faUser, faKey } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+
+library.add(faUser, faKey)
+
+Vue.component('font-awesome-icon', FontAwesomeIcon)
 
 Vue.config.productionTip = false
 Vue.prototype.$http = (url, data) => {
@@ -13,6 +20,7 @@ Vue.prototype.$http = (url, data) => {
     axios.post(url, data).then((result) => {
       resolve(result.data)
     }).catch((err) => {
+      console.log(err)
       reject(err)
     })
   })

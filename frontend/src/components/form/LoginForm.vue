@@ -1,9 +1,15 @@
 <template>
-    <div>
+    <div class="form-gorup">
+      <div class="form-field">
+        <font-awesome-icon icon="user" />
         <input type="text" v-model="logindata.email" placeholder="이메일" />
+      </div>
+      <div class="form-field">
+        <font-awesome-icon icon="key" />
         <input type="password" v-model="logindata.pwd" placeholder="비밀번호" />
-        <button @click="btnLogin">로그인</button>
-        <button @click="test">테스트</button>
+      </div>
+      <button @click="btnLogin">로그인</button>
+      <button @click="test">테스트</button>
     </div>
 </template>
 
@@ -20,14 +26,20 @@ export default {
   },
   methods: {
     async btnLogin () {
-      await this.$http('/api/dlog/login', this.logindata)
-      console.log(this.$cookie.get('token'))
+      try {
+        await this.$http('/api/user/login', this.logindata)
+        this.$router.push('/main')
+      } catch (error) {
+        alert(error)
+        console.log(error)
+      }
     },
     async test () {
-      const data = await this.$http('/api/test/echo')
-      console.log(this.$cookie.get('token'))
-      console.log(data)
+      await this.$http('/api/test/echo')
     }
   }
 }
 </script>
+
+<style scoped>
+</style>

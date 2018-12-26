@@ -1,7 +1,11 @@
 <template>
-    <div class="default-layout">
-        <slot></slot>
+  <div id="default-layout">
+    <div class="left-container">
     </div>
+    <div class="content-container">
+      <slot></slot>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -10,10 +14,24 @@ export default {
 }
 </script>
 
-<style scoped>
-.default-layout {
-    width: 100%;
+<style lang="scss" scoped>
+#default-layout {
+  width: inherit;
+  height: inherit;
+  .left-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    width: 35%;
     height: 100%;
-    padding: 0!important;
+    background-image: url("~@/assests/images/bg.jpg");
+    position: fixed;
+  }
+  .content-container {
+    margin-left: 35%;
+    max-width: 54em;
+    padding: 8em 4em 4em 4em;
+    width: calc(100%-35%);
+  }
 }
 </style>
