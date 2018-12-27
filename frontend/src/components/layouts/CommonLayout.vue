@@ -11,4 +11,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+#common-layout {
+  width: inherit;
+  height: inherit;
+}
 </style>

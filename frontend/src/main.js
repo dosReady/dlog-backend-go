@@ -9,11 +9,12 @@ import 'es6-promise/auto'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faUser, faKey } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import VueCodemirror from 'vue-codemirror'
+import 'codemirror/lib/codemirror.css'
 
 library.add(faUser, faKey)
 
 Vue.component('font-awesome-icon', FontAwesomeIcon)
-
 Vue.config.productionTip = false
 Vue.prototype.$http = (url, data) => {
   return new Promise((resolve, reject) => {
@@ -28,6 +29,7 @@ Vue.prototype.$http = (url, data) => {
 }
 Vue.prototype.$eventBus = new Vue()
 Vue.use(VueCookie)
+Vue.use(VueCodemirror)
 
 /* eslint-disable no-new */
 new Vue({
