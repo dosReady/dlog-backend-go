@@ -1,10 +1,15 @@
 <template>
   <div id="default-layout">
     <header class="left-container">
-        <div class="login-info" v-if="user != null">
+        <div class="login-info" v-if="!isEmptyUser">
             <label>{{user.Email}}</label>
             <button class="btn" @click="logout">로그아웃</button>
             <button class="btn" @click="test">테스트</button>
+            <div class="menu-container">
+              <router-link to="/post/register">포스트 작성</router-link>
+              <router-link to="/">DLOG 작성</router-link>
+              <router-link to="/">코드 저장소</router-link>
+            </div>
         </div>
     </header>
     <div class="content-container">
@@ -22,13 +27,23 @@ export default {
     }
   },
   created () {
-    let user = JSON.parse(this.$cookie.get('user'))
-    this.user = user
-    console.log(user)
+    const cookieUser = this.$cookie.get('user')
+    if (cookieUser) {
+      this.user = JSON.parse(this.$cookie.get('user'))
+    }
+    this.$eventBus.$on('setUser', () => {
+      this.user = JSON.parse(this.$cookie.get('user'))
+    })
+  },
+  computed: {
+    isEmptyUser () {
+      return Object.keys(this.user).length === 0
+    }
   },
   methods: {
     async logout () {
       await this.$http('/api/user/logout')
+      this.user = {}
       this.$router.push('/')
     },
     async test () {
@@ -55,6 +70,9 @@ export default {
         button {
             margin-top: 1rem;
         }
+    }
+    .menu-container {
+      margin-top: 1rem;
     }
   }
   .content-container {

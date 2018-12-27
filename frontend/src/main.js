@@ -9,7 +9,6 @@ import 'es6-promise/auto'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faUser, faKey } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { stroe } from './store'
 
 library.add(faUser, faKey)
 
@@ -21,11 +20,13 @@ Vue.prototype.$http = (url, data) => {
     axios.post(url, data).then((result) => {
       resolve(result.data)
     }).catch((err) => {
-      console.log(err)
-      reject(err)
+      if (err.response.status === 401) {
+        router.push('/')
+      } else reject(err)
     })
   })
 }
+Vue.prototype.$eventBus = new Vue()
 Vue.use(VueCookie)
 
 /* eslint-disable no-new */
@@ -33,6 +34,5 @@ new Vue({
   el: '#app',
   router,
   components: { App },
-  template: '<App/>',
-  stroe
+  template: '<App/>'
 })

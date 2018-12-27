@@ -14,7 +14,6 @@
 </template>
 
 <script>
-import { mapMutations } from 'vuex'
 export default {
   name: 'LoginForm',
   data () {
@@ -26,14 +25,10 @@ export default {
     }
   },
   methods: {
-    ...mapMutations([
-      'setUser'
-    ]),
     async btnLogin () {
       try {
         await this.$http('/api/user/login', this.logindata)
-        let user = JSON.parse(this.$cookie.get('user'))
-        this.
+        this.$eventBus.$emit('setUser')
         this.$router.push('/main')
       } catch (error) {
         alert(error)
