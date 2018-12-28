@@ -1,6 +1,6 @@
 <template>
-    <div class="editor-container">
-      <div class="input-content">
+    <div id="editor-container">
+      <div class="editor-wrap">
         <codemirror v-model="data.post_content" :options="cmOption"></codemirror>
       </div>
       <div class="markdown-body" v-html="compiledMarkdown"></div>
@@ -22,8 +22,8 @@ export default {
         theme: 'material',
         lineNumbers: false,
         lineWrapping: true,
-        // scrollbarStyle: 'overlay',
-        placeholder: '내용을 입력해보세요!'
+        placeholder: '내용을 입력해보세요!',
+        size: '100%'
       }
     }
   },
@@ -33,24 +33,29 @@ export default {
   },
   computed: {
     compiledMarkdown () {
-      let content = ''
-      if (this.data.post_content) {
-        content = this.data.post_content
-      }
-      return marked(content, { sanitize: true })
+      return marked(this.data.post_content, { sanitize: true })
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-@import '~@/assests/css/github-markdown';
-.editor-container{
-    display: flex;
-    flex-direction: column;
-}
-.input-content {
-  background-color: #263238!important;
-  color: white!important;
+#editor-container{
+  display: flex;
+  width: 100%;
+  height: 100%;
+  .editor-wrap {
+    flex: 1 1;
+    background-color: #263238;
+    padding: 1rem;
+    overflow: auto;
+    overflow-x: scroll;
+  }
+  .markdown-body {
+    flex: 1 1;
+    box-sizing: border-box;
+    margin: 0 auto;
+    padding: 45px;
+  }
 }
 </style>

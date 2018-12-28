@@ -10,7 +10,12 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { faUser, faKey } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import VueCodemirror from 'vue-codemirror'
-import 'codemirror/lib/codemirror.css'
+import 'codemirror/addon/scroll/simplescrollbars.css'
+import 'codemirror/addon/scroll/simplescrollbars.js'
+import 'codemirror/addon/display/placeholder.js'
+import 'codemirror/theme/material.css'
+import '@/assests/css/github-markdown.css'
+import '@/assests/css/codemirror.css'
 
 library.add(faUser, faKey)
 
