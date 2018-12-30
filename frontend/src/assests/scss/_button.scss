@@ -1,14 +1,30 @@
 .btn {
     color: white;
-    background-color: transparent;
+    background-color: #353866!important;
     user-select: none;
     &:not(:disabled):not(.disabled) {
         cursor: pointer;
     }
     &:hover {
-        background-color: rgb(40, 40, 131)!important;
+        background-color: #424461!important;
     }
     &:focus {
         outline: none;
     }
+    &.save {
+        background-color: rgb(65, 211, 189)!important;
+        &:hover {
+            background-color: rgb(91, 247, 223)!important;
+        }
+    }
+    &.temp {
+        background-color: rgb(155, 155, 155)!important;
+        &:hover {
+            background-color: rgb(184, 183, 183)!important;
+        }
+    }
+}
+
+.btn-group {
+    display: flex;
 }

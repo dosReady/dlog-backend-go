@@ -3,8 +3,20 @@
       <div class="editor-wrap">
         <header>
           <input type="text" placeholder="제목을 입력하세요"/>
-          <button class="btn"><font-awesome-icon icon="ellipsis-h" /></button>
+          <button class="btn" @click="showSubmit">완료</button>
         </header>
+        <div :class="submitClass">
+          <div class="title">글 작성하기</div>
+          <div class="btn-group field">
+            <input type="text" placeholder="카테고리를 입력하세요"/>
+            <button class="btn">등록</button>
+          </div>
+          <button class="btn field">업로드</button>
+          <div class="btn-group">
+            <button class="btn temp">임시저장</button>
+            <button class="btn save">저장</button>
+          </div>
+        </div>
         <div class="codemirror-wrap">
           <codemirror v-model="data.post_content" :options="cmOption"></codemirror>
         </div>
@@ -30,12 +42,19 @@ export default {
         lineWrapping: true,
         placeholder: '내용을 입력해보세요!',
         size: '100%'
+      },
+      submitClass: {
+        'submit-area': true,
+        'hide': true
       }
     }
   },
   created () {
   },
   methods: {
+    showSubmit () {
+      this.submitClass.hide = !this.submitClass.hide
+    }
   },
   computed: {
     compiledMarkdown () {
@@ -52,6 +71,32 @@ export default {
   .editor-wrap {
     flex: 1 1;
     background-color: #263238;
+    position: relative;
+    .submit-area {
+      &.hide {
+        display: none!important;
+      }
+      display: flex;
+      flex-direction: column;
+      background-color: rgb(84, 84, 108);
+      position: absolute;
+      right: 2rem;
+      top: 4rem;
+      z-index: 15;
+      padding: 1rem 2rem 1rem 2rem;
+      .title {
+        color: white;
+        margin-bottom: 1rem;
+      }
+      input {
+        flex: 0 0 70%;
+        padding: 1rem;
+        background-color: white;
+        &::placeholder {
+          color: gray;
+        }
+      }
+    }
     header {
       display: flex;
       height: 3rem;
@@ -70,11 +115,11 @@ export default {
       }
     }
     .codemirror-wrap {
-      height: 100%;
+      height: calc(100% - 5rem);
       background-color: #263238;
-      padding: 1rem;
+      padding: 1rem 1rem 1rem 1rem;
       overflow: auto;
-      overflow-x: scroll;
+      overflow-y: scroll;
     }
   }
   .markdown-body {
@@ -82,6 +127,7 @@ export default {
     box-sizing: border-box;
     margin: 0 auto;
     padding: 45px;
+    height: 100%;
   }
 }
 </style>

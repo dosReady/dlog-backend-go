@@ -10,6 +10,7 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { faUser, faKey, faEllipsisH } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import VueCodemirror from 'vue-codemirror'
+import VModal from 'vue-js-modal'
 import 'codemirror/addon/scroll/simplescrollbars.css'
 import 'codemirror/addon/scroll/simplescrollbars.js'
 import 'codemirror/addon/display/placeholder.js'
@@ -35,6 +36,7 @@ Vue.prototype.$http = (url, data) => {
 Vue.prototype.$eventBus = new Vue()
 Vue.use(VueCookie)
 Vue.use(VueCodemirror)
+Vue.use(VModal)
 
 /* eslint-disable no-new */
 new Vue({
