@@ -21,7 +21,7 @@ export default new Router({
     {
       path: '/post/register',
       name: 'PostRegPage',
-      component: () => import('@/pages/post/PostRegPage'),
+      component: () => import('@/pages/post/PostWorkPage'),
       meta: {layout: 'common'}
     }
   ]

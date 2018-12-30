@@ -1,7 +1,13 @@
 <template>
     <div id="editor-container">
       <div class="editor-wrap">
-        <codemirror v-model="data.post_content" :options="cmOption"></codemirror>
+        <header>
+          <input type="text" placeholder="제목을 입력하세요"/>
+          <button class="btn"><font-awesome-icon icon="ellipsis-h" /></button>
+        </header>
+        <div class="codemirror-wrap">
+          <codemirror v-model="data.post_content" :options="cmOption"></codemirror>
+        </div>
       </div>
       <div class="markdown-body" v-html="compiledMarkdown"></div>
     </div>
@@ -40,16 +46,36 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-#editor-container{
+#editor-container {
   display: flex;
-  width: 100%;
   height: 100%;
   .editor-wrap {
     flex: 1 1;
     background-color: #263238;
-    padding: 1rem;
-    overflow: auto;
-    overflow-x: scroll;
+    header {
+      display: flex;
+      height: 3rem;
+      background-color: #112530;
+      input {
+        flex: 0 0 80%;
+        color: white;
+        font-size: 1rem;
+      }
+      button {
+        flex: 1 1;
+        svg {
+          color: white;
+          font-size: 1rem;
+        }
+      }
+    }
+    .codemirror-wrap {
+      height: 100%;
+      background-color: #263238;
+      padding: 1rem;
+      overflow: auto;
+      overflow-x: scroll;
+    }
   }
   .markdown-body {
     flex: 1 1;

@@ -20,5 +20,14 @@ input, button, textarea, select {
   padding: 1rem;
   border-radius: 0.25rem;
   border: 0;
+  box-sizing: border-box;
   width: 100%;
+  background-color: transparent;
+}
+
+input::placeholder, textarea::placeholder {
+  color: white;
+}
+input:focus {
+  outline: none
 }
