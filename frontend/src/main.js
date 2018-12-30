@@ -36,7 +36,10 @@ Vue.prototype.$http = (url, data) => {
 Vue.prototype.$eventBus = new Vue()
 Vue.use(VueCookie)
 Vue.use(VueCodemirror)
-Vue.use(VModal)
+Vue.use(VModal, {
+  dialog: true,
+  dynamic: true
+})
 
 /* eslint-disable no-new */
 new Vue({

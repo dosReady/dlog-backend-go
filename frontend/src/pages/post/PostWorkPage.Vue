@@ -2,7 +2,7 @@
     <div id="editor-container">
       <div class="editor-wrap">
         <header>
-          <input type="text" placeholder="제목을 입력하세요"/>
+          <input type="text" v-model="data.post_title" placeholder="제목을 입력하세요"/>
           <button class="btn" @click="showSubmit">완료</button>
         </header>
         <div :class="submitClass">
@@ -13,8 +13,8 @@
           </div>
           <button class="btn field">업로드</button>
           <div class="btn-group">
-            <button class="btn temp">임시저장</button>
-            <button class="btn save">저장</button>
+            <button class="btn temp" @click="tempSave">임시저장</button>
+            <button class="btn save" @click="postSave">저장</button>
           </div>
         </div>
         <div class="codemirror-wrap">
@@ -22,6 +22,7 @@
         </div>
       </div>
       <div class="markdown-body" v-html="compiledMarkdown"></div>
+      <v-dialog />
     </div>
 </template>
 
@@ -33,6 +34,7 @@ export default {
   data () {
     return {
       data: {
+        post_title: '',
         post_content: ''
       },
       cmOption: {
@@ -52,13 +54,30 @@ export default {
   created () {
   },
   methods: {
+    async postSave () {
+      try {
+        const data = await this.$http('/api/post/register', this.data)
+        alert(data)
+      } catch (error) {
+        alert(error)
+        console.log(error)
+      }
+    },
+    async tempSave () {
+      this.$modal.show('dialog', {
+        title: 'Information',
+        text: 'Check out, I have a title 😎'
+      })
+    },
     showSubmit () {
       this.submitClass.hide = !this.submitClass.hide
     }
   },
   computed: {
     compiledMarkdown () {
-      return marked(this.data.post_content, { sanitize: true })
+      let title = `#\t${this.data.post_title}\n`
+      let content = `${this.data.post_content}`
+      return marked(title + content, { sanitize: true })
     }
   }
 }
