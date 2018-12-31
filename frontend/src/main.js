@@ -7,7 +7,7 @@ import axios from 'axios'
 import VueCookie from 'vue-cookie'
 import 'es6-promise/auto'
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faUser, faKey, faEllipsisH } from '@fortawesome/free-solid-svg-icons'
+import { faUser, faKey, faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import VueCodemirror from 'vue-codemirror'
 import VModal from 'vue-js-modal'
@@ -18,7 +18,7 @@ import 'codemirror/theme/material.css'
 import '@/assests/css/github-markdown.css'
 import '@/assests/css/codemirror.css'
 
-library.add(faUser, faKey, faEllipsisH)
+library.add(faUser, faKey, faArrowLeft)
 
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 Vue.config.productionTip = false

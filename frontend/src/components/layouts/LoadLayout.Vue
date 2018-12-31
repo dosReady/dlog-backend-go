@@ -15,11 +15,9 @@ export default {
     'CommonLayout': () => import('@/components/layouts/CommonLayout')
   },
   created () {
-    console.log(this.$route.meta.layout)
   },
   computed: {
     switchLayout () {
-      console.log(this.$route.meta.layout)
       return (this.$route.meta.layout || defaultLayout) + '-layout'
     }
   }

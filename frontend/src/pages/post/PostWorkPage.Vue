@@ -2,6 +2,7 @@
     <div id="editor-container">
       <div class="editor-wrap">
         <header>
+          <button class="btn" @click="goBack"><font-awesome-icon icon="arrow-left" /></button>
           <input type="text" v-model="data.post_title" placeholder="제목을 입력하세요"/>
           <button class="btn" @click="showSubmit">완료</button>
         </header>
@@ -22,7 +23,7 @@
         </div>
       </div>
       <div class="markdown-body" v-html="compiledMarkdown"></div>
-      <v-dialog />
+      <v-dialog @closed="dialogEvent('closed')"/>
     </div>
 </template>
 
@@ -54,10 +55,16 @@ export default {
   created () {
   },
   methods: {
+    goBack () {
+      this.$router.go(-1)
+    },
     async postSave () {
       try {
-        const data = await this.$http('/api/post/register', this.data)
-        alert(data)
+        await this.$http('/api/post/register', this.data)
+        this.$modal.show('dialog', {
+          title: '정보',
+          text: '저장되었습니다.'
+        })
       } catch (error) {
         alert(error)
         console.log(error)
@@ -65,12 +72,15 @@ export default {
     },
     async tempSave () {
       this.$modal.show('dialog', {
-        title: 'Information',
-        text: 'Check out, I have a title 😎'
+        title: '정보',
+        text: '저장되었습니다.'
       })
     },
     showSubmit () {
       this.submitClass.hide = !this.submitClass.hide
+    },
+    dialogEvent (eventName) {
+      if (eventName === 'closed') this.$router.go(-1)
     }
   },
   computed: {

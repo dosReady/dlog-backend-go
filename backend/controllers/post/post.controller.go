@@ -8,6 +8,9 @@ import (
 )
 
 func PostRegsiter(c *gin.Context) {
-	postModel.Register(c)
-	c.JSON(http.StatusOK, gin.H{"name": "성공"})
+	if err := postModel.Register(c); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"errmsg": err})
+	} else {
+		c.JSON(http.StatusOK, gin.H{"success": 1})
+	}
 }

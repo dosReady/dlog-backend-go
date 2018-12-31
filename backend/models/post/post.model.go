@@ -1,6 +1,7 @@
 package post
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/dosReady/dlog/backend/models/common"
@@ -15,7 +16,7 @@ type DlogPost struct {
 	common.Base
 }
 
-func Register(c *gin.Context) {
+func Register(c *gin.Context) error {
 	if body, exists := c.Get("body"); exists {
 		body := body.(map[string]interface{})
 
@@ -28,7 +29,10 @@ func Register(c *gin.Context) {
 				UpdateDate: time.Now(),
 			},
 		}).Error; err != nil {
-			panic(err)
+			fmt.Println(err)
+			return err
 		}
 	}
+
+	return nil
 }

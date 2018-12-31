@@ -6,6 +6,7 @@
             <button class="btn" @click="logout">로그아웃</button>
             <button class="btn" @click="test">테스트</button>
             <div class="menu-container">
+              <router-link to="/post/list">포스트 목록</router-link>
               <router-link to="/post/register">포스트 작성</router-link>
               <router-link to="/">DLOG 작성</router-link>
               <router-link to="/">코드 저장소</router-link>
@@ -44,7 +45,7 @@ export default {
     async logout () {
       await this.$http('/api/user/logout')
       this.user = {}
-      this.$router.push('/')
+      this.$router.push('/login')
     },
     async test () {
       await this.$http('/api/test/echo')

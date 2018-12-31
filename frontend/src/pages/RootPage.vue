@@ -1,13 +1,11 @@
 <template>
-    <login-form></login-form>
+  <div>메인</div>
 </template>
 
 <script>
-import LoginForm from '@/components/form/LoginForm'
 export default {
   name: 'RootPage',
   components: {
-    LoginForm
   }
 }
 </script>
