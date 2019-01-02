@@ -46,7 +46,7 @@ func CreateAccessToken(obj interface{}) (string, string) {
 		Data: jsonobj,
 		Xid:  xidstr,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Minute * 5).Unix(),
+			ExpiresAt: time.Now().Add(time.Millisecond * 1000).Unix(),
 			Issuer:    "dlog",
 		},
 	}

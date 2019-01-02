@@ -14,6 +14,7 @@
 </template>
 
 <script>
+import { EventBus } from '@/assets/js/eventbus'
 export default {
   name: 'LoginForm',
   data () {
@@ -28,7 +29,7 @@ export default {
     async btnLogin () {
       try {
         await this.$http('/api/user/login', this.logindata)
-        this.$eventBus.$emit('setUser')
+        EventBus.$emit('setUser')
         this.$router.push('/main')
       } catch (error) {
         alert(error)

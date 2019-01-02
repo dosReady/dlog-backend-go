@@ -14,3 +14,8 @@ func PostRegsiter(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"success": 1})
 	}
 }
+
+func PostList(c *gin.Context) {
+	list := postModel.List(c)
+	c.JSON(http.StatusOK, gin.H{"list": list})
+}

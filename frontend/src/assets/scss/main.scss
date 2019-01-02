@@ -30,3 +30,15 @@ input::placeholder, textarea::placeholder {
 input:focus {
   outline: none
 }
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  li {
+    margin-bottom: 5rem;
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}

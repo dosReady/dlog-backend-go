@@ -15,8 +15,9 @@ import 'codemirror/addon/scroll/simplescrollbars.css'
 import 'codemirror/addon/scroll/simplescrollbars.js'
 import 'codemirror/addon/display/placeholder.js'
 import 'codemirror/theme/material.css'
-import '@/assests/css/github-markdown.css'
-import '@/assests/css/codemirror.css'
+import '@/assets/css/github-markdown.css'
+import '@/assets/css/codemirror.css'
+import { EventBus } from './assets/js/eventbus'
 
 library.add(faUser, faKey, faArrowLeft)
 
@@ -28,12 +29,12 @@ Vue.prototype.$http = (url, data) => {
       resolve(result.data)
     }).catch((err) => {
       if (err.response.status === 401) {
-        router.push('/')
+        EventBus.$emit('deleteUser')
+        router.push('/login')
       } else reject(err)
     })
   })
 }
-Vue.prototype.$eventBus = new Vue()
 Vue.use(VueCookie)
 Vue.use(VueCodemirror)
 Vue.use(VModal, {

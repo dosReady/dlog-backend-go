@@ -27,6 +27,7 @@ func SettingRouters(r *gin.Engine) {
 	apir2 := r.Group("/api/post", middleware.CertifiedMdlw())
 	{
 		apir2.POST("/register", postCtrl.PostRegsiter)
+		apir2.POST("/list", postCtrl.PostList)
 	}
 
 	apitest := r.Group("/api/test")

@@ -20,6 +20,7 @@
 </template>
 
 <script>
+import { EventBus } from '@/assets/js/eventbus'
 export default {
   name: 'DefaultLayout',
   data () {
@@ -32,8 +33,13 @@ export default {
     if (cookieUser) {
       this.user = JSON.parse(this.$cookie.get('user'))
     }
-    this.$eventBus.$on('setUser', () => {
+    EventBus.$on('setUser', () => {
       this.user = JSON.parse(this.$cookie.get('user'))
+    })
+    EventBus.$on('deleteUser', () => {
+      console.log('deleteUser')
+      this.user = {}
+      this.$cookie.delete('user')
     })
   },
   computed: {
@@ -62,9 +68,9 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    width: 35%;
+    width: 30%;
     height: 100%;
-    background-image: url("~@/assests/images/bg.jpg");
+    background-image: url("~@/assets/images/bg.jpg");
     position: fixed;
     .login-info {
         margin: 30rem auto;
@@ -77,10 +83,10 @@ export default {
     }
   }
   .content-container {
-    margin-left: 35%;
+    margin-left: 30%;
     max-width: 54em;
     padding: 8em 4em 4em 4em;
-    width: calc(100%-35%);
+    width: calc(100% - 30%);
   }
 }
 </style>
